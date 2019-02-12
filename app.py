@@ -13,23 +13,23 @@ CORS(app)
 class API(Resource):
     def get(self):
 
-        bucketName = 'cs493.songify.library'
-        songName = '01FindAWayBack.mp3'
-        #Expires
-        s3 = boto3.client('s3')
-        url = s3.generate_presigned_url(
-            ClientMethod='get_object',
-            Params={
-                'Bucket':bucketName,
-                'Key': songName
-            }
-        )
-        response = requests.get(url)
+        # bucketName = 'cs493.songify.library'
+        # songName = '01FindAWayBack.mp3'
+        # #Expires
+        # s3 = boto3.client('s3')
+        # url = s3.generate_presigned_url(
+        #     ClientMethod='get_object',
+        #     Params={
+        #         'Bucket':bucketName,
+        #         'Key': songName
+        #     }
+        # )
+        # response = requests.get(url)
 
-        print(response)
+        # print(response)
         
 
-        return {'Artist': 'TheSkyCouldFly','Album': 'Geodesic','Link':url}
+        return {'Artist': 'TheSkyCouldFly','Album': 'Geodesic','Link':'https://s3.amazonaws.com/toast-static-website/01+Find+A+Way+Back.mp3'}
 
 
 api.add_resource(API, '/')
