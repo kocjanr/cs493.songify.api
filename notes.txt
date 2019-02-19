@@ -1,0 +1,17 @@
+API has a route at "/genres" that responds to a GET with at least 2 genres as JSON
+example request GET "/genres" would respond with ["genre1", "genre2"]
+10.0 pts
+
+This criterion is linked to a Learning Outcome API has a route at "/artists/for/genre" that responds to a GET with at least 2 artists in a genre as JSON
+example request GET "/artist/by/genre?genre=country" would respond with ["Artist1", "Artist2"]
+10.0 pts
+
+This criterion is linked to a Learning Outcome API has a route at "/albums/for/artist" that responds to a GET with at least 2 albums as JSON
+example request GET "/albums/for/artist?artist=dan" would respond with ["album1", "album2"]
+10.0 pts
+
+This criterion is linked to a Learning Outcome API has a route at "/songs/for/album" that responds to a GET with at least 2 songs as JSON
+example request GET "songs/for/album?album=phoenix" would respond with ["The Skinny", "PopMatters"]
+10.0 pts
+
+This criterion is linked to a Learning Outcome API has a route at "/song?song=wonderwalll" that responds to a GET with a url to play a song
