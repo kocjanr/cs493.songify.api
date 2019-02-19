@@ -49,7 +49,7 @@ class Song(Resource):
 class Genres(Resource):
     def get(self):
         if request.method == 'GET':
-            dynamodb = boto3.resource('dynamodb')
+            dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
             table = dynamodb.Table('Music')
 
             response = table.scan()
