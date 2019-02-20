@@ -6,6 +6,8 @@ import boto3
 from boto3.dynamodb.conditions import Key, Attr
 import requests
 from flask_cors import CORS
+from var import Vars
+import os
 
 app = Flask(__name__)
 api = Api(app)
@@ -25,7 +27,8 @@ class Song(Resource):
         if request.method == 'GET':
             songTitle = request.args.get('song')
 
-            dynamodb = boto3.resource('dynamodb')
+            dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+            aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
             table = dynamodb.Table('Music')
             response = table.scan(
                 FilterExpression= Attr('SongTitle').eq(songTitle)
@@ -41,11 +44,13 @@ class Song(Resource):
 class Genres(Resource):
     def get(self):
         if request.method == 'GET':
-            dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
+            dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+            aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
             table = dynamodb.Table('Music')
 
             response = table.scan()
             items = response['Items']
+
 
             if not items:
                 return{'Genres': 'None'}
@@ -61,7 +66,8 @@ class Songs(Resource):
     def get(self):   
         albumName = request.args.get('album')    
 
-        dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
         table = dynamodb.Table('Music')
 
         response = table.scan()

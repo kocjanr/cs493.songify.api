@@ -2,3 +2,7 @@
 env/
 
 notes\.txt
+
+var\.py
+
+__pycache__/
