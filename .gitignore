@@ -6,3 +6,5 @@ notes\.txt
 var\.py
 
 __pycache__/
+
+\.vscode/

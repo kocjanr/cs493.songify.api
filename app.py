@@ -19,25 +19,26 @@ class API(Resource):
             id = request.args.get('id')
             return{'this': id}
 
-        return{'this': 'that'}
+        return{'hello': 'goodbye'}
 
 class Song(Resource):
     def get(self):
-        if request.method == 'GET':
-            songTitle = request.args.get('song')
+        songTitle = request.args.get('song')
 
-            dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
-            aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
-            table = dynamodb.Table('Music')
-            response = table.scan(
-                FilterExpression= Attr('SongTitle').eq(songTitle)
-            )
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('Music')
+        response = table.scan(
+            FilterExpression= Attr('SongTitle').eq(songTitle)
+        )
 
-            item = response['Items']
-            if not item:
-                return {'song':'Not found'}           
-            
-            return {'url': item['S3Link']}
+        item = response['Items']
+        if not item:
+            return {'song':'Not found'}   
+
+        url = item[0]['S3Link']   
+        
+        return {'url': url}
 
 class Genres(Resource):
     def get(self):
@@ -108,6 +109,6 @@ api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
 
 if __name__ == '__main__':
-    #app.run(host="0.0.0.0", port=80)    
-    app.run(host="127.0.0.1", port=8080)
+    app.run(host="0.0.0.0", port=80)    
+    #app.run(host="127.0.0.1", port=8080)
     app.run(debug=False)
