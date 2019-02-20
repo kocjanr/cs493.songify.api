@@ -20,14 +20,6 @@ class API(Resource):
 
         return{'this': 'that'}
 
-
-class Artists(Resource):
-    def get(self):
-        if request.method == 'GET':
-            id = request.args.get('id')
-            return{'artists': id}
-
-
 class Song(Resource):
     def get(self):
         if request.method == 'GET':
@@ -56,7 +48,7 @@ class Genres(Resource):
             items = response['Items']
 
             if not items:
-                return{'Generes': 'None'}
+                return{'Genres': 'None'}
 
             genres = []
             for s in items:
@@ -64,23 +56,42 @@ class Genres(Resource):
 
             return{'Genres': genres}
 
-
-class Albums(Resource):
-    def get(self):
-        if request.method == 'GET':
-            songTitle = request.args.get('song')
-            return{'Song Title': songTitle}
-
-
+# http://127.0.0.1:8080/songs/for/album?album=Geodesic
 class Songs(Resource):
-    def get(self):
-        if request.method == 'GET':
-            id = request.args.get('id')
-            return{'artists': id}
+    def get(self):   
+        albumName = request.args.get('album')    
+
+        dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
+        table = dynamodb.Table('Music')
+
+        response = table.scan()
+        items = response['Items'] 
+
+        songs = []
+
+        for s in items:
+            if s['Album'] == albumName:
+                songs.append(s['SongTitle'])
+
+        return{'Songs':songs}
 
 
+#"/albums/for/artist?artist=dan
+# http://127.0.0.1:8080/albums/for/artist
+class Albums(Resource):
+    def get(self):   
+        artist = request.args.get('artist')    
+
+        # dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
+        # table = dynamodb.Table('Music')
+
+        # response = table.scan()
+        # items = response['Items'] 
+
+        return{'Albums':artist}
+
+#"/albums/for/artist?artist=dan
 api.add_resource(API, '/')
-api.add_resource(Artists, '/artists/by/genre')
 api.add_resource(Albums, '/albums/for/artist')
 api.add_resource(Songs, '/songs/for/album')
 api.add_resource(Song, '/song')
@@ -88,4 +99,5 @@ api.add_resource(Genres, '/genres')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=80)
+    #app.run(host="127.0.0.1", port=8080)
     app.run(debug=False)
