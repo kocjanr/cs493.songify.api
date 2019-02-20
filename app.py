@@ -13,7 +13,6 @@ app = Flask(__name__)
 api = Api(app)
 CORS(app)
 
-
 class API(Resource):
     def get(self):
         if request.method == 'GET':
@@ -38,8 +37,7 @@ class Song(Resource):
             if not item:
                 return {'song':'Not found'}           
             
-            return item
-
+            return {'url': item['S3Link']}
 
 class Genres(Resource):
     def get(self):
@@ -50,7 +48,6 @@ class Genres(Resource):
 
             response = table.scan()
             items = response['Items']
-
 
             if not items:
                 return{'Genres': 'None'}
@@ -81,20 +78,27 @@ class Songs(Resource):
 
         return{'Songs':songs}
 
-
 #"/albums/for/artist?artist=dan
-# http://127.0.0.1:8080/albums/for/artist
+# http://127.0.0.1:8080/albums/for/artist?artist=TheSkyCouldFly
 class Albums(Resource):
     def get(self):   
         artist = request.args.get('artist')    
 
-        # dynamodb = boto3.resource('dynamodb',region_name='us-east-1')
-        # table = dynamodb.Table('Music')
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('Music')
 
-        # response = table.scan()
-        # items = response['Items'] 
+        response = table.scan()
+        items = response['Items'] 
 
-        return{'Albums':artist}
+        albums = []
+
+        for s in items:
+            if s['Artist'] == artist:
+                albums.append(s['Album'])
+
+
+        return{'Albums': albums}
 
 #"/albums/for/artist?artist=dan
 api.add_resource(API, '/')
@@ -104,6 +108,6 @@ api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80)
-    #app.run(host="127.0.0.1", port=8080)
+    #app.run(host="0.0.0.0", port=80)    
+    app.run(host="127.0.0.1", port=8080)
     app.run(debug=False)
