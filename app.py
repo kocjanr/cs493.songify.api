@@ -1,8 +1,13 @@
 #source env/bin/activate
 
-from flask import Flask
+from flask import Flask, request
 from flask_restful import Resource, Api
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+import requests
 from flask_cors import CORS
+from var import Vars
+import os
 
 app = Flask(__name__)
 api = Api(app)
@@ -10,34 +15,100 @@ CORS(app)
 
 class API(Resource):
     def get(self):
+        if request.method == 'GET':
+            id = request.args.get('id')
+            return{'this': id}
 
-        bucketName = 'cs493.songify.library'
-        songName = '01FindAWayBack.mp3'
+        return{'hello': 'goodbye'}
+
+class Song(Resource):
+    def get(self):
+        songTitle = request.args.get('song')
+
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('Music')
+        response = table.scan(
+            FilterExpression= Attr('SongTitle').eq(songTitle)
+        )
+
+        item = response['Items']
+        if not item:
+            return {'song':'Not found'}   
+
+        url = item[0]['S3Link']   
         
-        #
-        # When runnnig this code on my ec2 i was reciving an 500 error
-        # when hitting the proper API route. I tried everything on Stack overflow
-        # and GitHub issues but that didn't work. I needed to update one single 
-        # package. When I update it still a 500 error. Instead to get any points for
-        # this assignment I uploaded a mp3 to a public bucket and removed the AWS skd
-        # calls to get a pre signed URL. So instead this API route returns a hard coded
-        # JSON with Artist, Album and public link to an mp3 
-        # 
+        return {'url': url}
 
-        # s3 = boto3.client('s3')
-        # url = s3.generate_presigned_url(
-        #     ClientMethod='get_object',
-        #     Params={
-        #         'Bucket':bucketName,
-        #         'Key': songName
-        #     }
-        # )
+class Genres(Resource):
+    def get(self):
+        if request.method == 'GET':
+            dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+            aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+            table = dynamodb.Table('Music')
 
-        return {'Artist': 'TheSkyCouldFly','Album': 'Geodesic','Link':' 	https://s3.amazonaws.com/toast-static-website/01+Find+A+Way+Back.mp3'}
+            response = table.scan()
+            items = response['Items']
+
+            if not items:
+                return{'Genres': 'None'}
+
+            genres = []
+            for s in items:
+                genres.append(s['Genre'])
+
+            return{'Genres': genres}
+
+# http://127.0.0.1:8080/songs/for/album?album=Geodesic
+class Songs(Resource):
+    def get(self):   
+        albumName = request.args.get('album')    
+
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('Music')
+
+        response = table.scan()
+        items = response['Items'] 
+
+        songs = []
+
+        for s in items:
+            if s['Album'] == albumName:
+                songs.append(s['SongTitle'])
+
+        return{'Songs':songs}
+
+#"/albums/for/artist?artist=dan
+# http://127.0.0.1:8080/albums/for/artist?artist=TheSkyCouldFly
+class Albums(Resource):
+    def get(self):   
+        artist = request.args.get('artist')    
+
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('Music')
+
+        response = table.scan()
+        items = response['Items'] 
+
+        albums = []
+
+        for s in items:
+            if s['Artist'] == artist:
+                albums.append(s['Album'])
 
 
+        return{'Albums': albums}
+
+#"/albums/for/artist?artist=dan
 api.add_resource(API, '/')
+api.add_resource(Albums, '/albums/for/artist')
+api.add_resource(Songs, '/songs/for/album')
+api.add_resource(Song, '/song')
+api.add_resource(Genres, '/genres')
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80)
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=80)    
+    #app.run(host="127.0.0.1", port=8080)
+    app.run(debug=False)
