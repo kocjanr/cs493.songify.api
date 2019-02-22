@@ -57,7 +57,9 @@ class Genres(Resource):
             for s in items:
                 genres.append(s['Genre'])
 
-            return{'Genres': genres}
+            output = list(dict.fromkeys(genres))
+
+            return{'Genres': output}
 
 # http://127.0.0.1:8080/songs/for/album?album=Geodesic
 class Songs(Resource):
@@ -101,7 +103,6 @@ class Albums(Resource):
 
         return{'Albums': albums}
 
-#"/albums/for/artist?artist=dan
 api.add_resource(API, '/')
 api.add_resource(Albums, '/albums/for/artist')
 api.add_resource(Songs, '/songs/for/album')
@@ -109,6 +110,5 @@ api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=80)    
-    #app.run(host="127.0.0.1", port=8080)
-    app.run(debug=False)
+    app.run(host=os.environ.get('HOST'), port=os.environ.get('PORT'))    
+    app.run(debug=True)
