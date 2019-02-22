@@ -103,10 +103,33 @@ class Albums(Resource):
         output = list(dict.fromkeys(albums))
 
         return{'Albums': output}
+\
+# http://127.0.0.1:8080/artist/by/genre?genre=Rock
+class Artists(Resource):
+    def get(self):   
+        genre = request.args.get('genre')    
+
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('Music')
+
+        response = table.scan()
+        items = response['Items'] 
+
+        artists = []
+
+        for s in items:
+            if s['Genre'] == genre:
+                artists.append(s['Artist'])
+
+        output = list(dict.fromkeys(artists))
+
+        return{genre: output}
 
 api.add_resource(API, '/')
 api.add_resource(Albums, '/albums/for/artist')
 api.add_resource(Songs, '/songs/for/album')
+api.add_resource(Artists, '/artist/by/genre')
 api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
 
