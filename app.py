@@ -79,7 +79,7 @@ class Songs(Resource):
             if s['Album'] == albumName:
                 songs.append(s['SongTitle'])
 
-        return{'Songs':songs}
+        return{albumName:{'songs':songs}}
 
 #"/albums/for/artist?artist=dan
 # http://127.0.0.1:8080/albums/for/artist?artist=TheSkyCouldFly
@@ -100,8 +100,9 @@ class Albums(Resource):
             if s['Artist'] == artist:
                 albums.append(s['Album'])
 
+        output = list(dict.fromkeys(albums))
 
-        return{'Albums': albums}
+        return{'Albums': output}
 
 api.add_resource(API, '/')
 api.add_resource(Albums, '/albums/for/artist')
@@ -110,5 +111,4 @@ api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
 
 if __name__ == '__main__':
-    app.run(host=os.environ.get('HOST'), port=os.environ.get('PORT'))    
-    app.run(debug=True)
+    app.run(host=os.environ.get('HOST'), port=os.environ.get('PORT'),debug=True)    
