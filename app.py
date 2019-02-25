@@ -27,7 +27,7 @@ class Song(Resource):
 
         dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
         aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
-        table = dynamodb.Table('Music')
+        table = dynamodb.Table('music')
         response = table.scan(
             FilterExpression= Attr('SongTitle').eq(songTitle)
         )
@@ -45,7 +45,7 @@ class Genres(Resource):
         if request.method == 'GET':
             dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
             aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
-            table = dynamodb.Table('Music')
+            table = dynamodb.Table('music')
 
             response = table.scan()
             items = response['Items']
@@ -68,7 +68,7 @@ class Songs(Resource):
 
         dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
         aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
-        table = dynamodb.Table('Music')
+        table = dynamodb.Table('music')
 
         response = table.scan()
         items = response['Items'] 
@@ -89,7 +89,7 @@ class Albums(Resource):
 
         dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
         aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
-        table = dynamodb.Table('Music')
+        table = dynamodb.Table('music')
 
         response = table.scan()
         items = response['Items'] 
@@ -111,7 +111,7 @@ class Artists(Resource):
 
         dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
         aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
-        table = dynamodb.Table('Music')
+        table = dynamodb.Table('music')
 
         response = table.scan()
         items = response['Items'] 
