@@ -1,10 +1,9 @@
 #source env/bin/activate
 
 from flask import Flask, request,jsonify
-from flask_restful import Resource, Api,reqparse,abort 
+from flask_restful import Resource, Api
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
-from boto.dynamodb2.table import Table
 import requests
 from flask_cors import CORS
 from var import Vars
@@ -14,7 +13,6 @@ app = Flask(__name__)
 api = Api(app)
 CORS(app)
 
-parser = reqparse.RequestParser()
 
 class API(Resource):
     def get(self):
