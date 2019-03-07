@@ -1,9 +1,10 @@
 #source env/bin/activate
 
-from flask import Flask, request
-from flask_restful import Resource, Api
+from flask import Flask, request,jsonify
+from flask_restful import Resource, Api,reqparse,abort 
 import boto3
 from boto3.dynamodb.conditions import Key, Attr
+from boto.dynamodb2.table import Table
 import requests
 from flask_cors import CORS
 from var import Vars
@@ -12,6 +13,8 @@ import os
 app = Flask(__name__)
 api = Api(app)
 CORS(app)
+
+parser = reqparse.RequestParser()
 
 class API(Resource):
     def get(self):
@@ -126,12 +129,33 @@ class Artists(Resource):
 
         return{genre: output}
 
+class SaveUser(Resource):
+    def post(self):
+        json_data = request.get_json(force=True)
+        email = json_data['Email']
+        uid = json_data['Id']
+        name = json_data['DisplayName']
+
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('users')
+        response = table.put_item(
+            Item={
+                'id': uid,
+                'email': email,
+                'name': name
+            }
+        )
+
+        return {'id':uid}
+
 api.add_resource(API, '/')
 api.add_resource(Albums, '/albums/for/artist')
 api.add_resource(Songs, '/songs/for/album')
 api.add_resource(Artists, '/artist/by/genre')
 api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
+api.add_resource(SaveUser, '/save-user')
 
 if __name__ == '__main__':
     app.run(host=os.environ.get('HOST'), port=os.environ.get('PORT'),debug=True)    
