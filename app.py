@@ -147,6 +147,26 @@ class SaveUser(Resource):
 
         return {'id':uid}
 
+    class Play(Resource):
+        def post(self):
+        json_data = request.get_json(force=True)
+        artist = json_data['artist']
+        album = json_data['album']
+        Song = json_data['song']
+
+        dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.environ.get('ACCESS_ID'),
+        aws_secret_access_key= os.environ.get('ACCESS_KEY'), region_name='us-east-1')
+        table = dynamodb.Table('music')
+
+        response = table.scan(
+            FilterExpression= Attr('SongTitle').eq(Song)
+        )
+        
+        item = response['Items']
+        url = item[0]['S3Link']   
+        
+        return {'url': url}
+
 api.add_resource(API, '/')
 api.add_resource(Albums, '/albums/for/artist')
 api.add_resource(Songs, '/songs/for/album')
@@ -154,6 +174,7 @@ api.add_resource(Artists, '/artist/by/genre')
 api.add_resource(Song, '/song')
 api.add_resource(Genres, '/genres')
 api.add_resource(SaveUser, '/save-user')
+api.add_resource(Play, '/play')
 
 if __name__ == '__main__':
     app.run(host=os.environ.get('HOST'), port=os.environ.get('PORT'),debug=True)    
